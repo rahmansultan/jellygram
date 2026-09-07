@@ -365,7 +365,7 @@ Useful scripts:
 ## Testing
 
 ```bash
-npm run build:tests && npm test    # 426 unit and integration tests
+npm run build:tests && npm test    # 431 unit and integration tests
 npm run test:frontend              # dashboard and Mini App UI in jsdom
 npm run test:e2e                   # the whole pipeline against a real video
 npm run test:all                   # everything

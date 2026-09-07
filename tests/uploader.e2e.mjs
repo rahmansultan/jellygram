@@ -1,7 +1,7 @@
 // First, before anything reads configuration: every process this suite
 // starts inherits a DATABASE_URL that points at the tests' own database.
 import '../dist-tests/tests/helpers/test-database.js';
-import { spawn, execFile } from 'node:child_process';
+import { spawn, execFile, execFileSync } from 'node:child_process';
 import { promisify } from 'node:util';
 import fs from 'node:fs';
 import fsp from 'node:fs/promises';
@@ -151,6 +151,48 @@ async function apiCall(base, token, method, route, { json, headers = {}, body } 
 }
 
 /**
+ * Jellyfin's bundled ffmpeg first, then a system one, then whatever is on PATH
+ * — the same order `src/services/identify.ts` uses to find ffprobe, and the
+ * same order the other end-to-end suites use.
+ *
+ * This used to be the single literal `/usr/lib/jellyfin-ffmpeg/ffmpeg`, which
+ * is only ever true on a host that has Jellyfin installed from its Debian
+ * package. Anywhere else — a CI runner, a container, a contributor's laptop,
+ * macOS — every check below passed and then the suite died on
+ * `spawn /usr/lib/jellyfin-ffmpeg/ffmpeg ENOENT` the moment it tried to build
+ * its first fixture.
+ */
+const FFMPEG_CANDIDATES = ['/usr/lib/jellyfin-ffmpeg/ffmpeg', '/usr/bin/ffmpeg', 'ffmpeg'];
+
+/**
+ * Resolved once, and required rather than optional.
+ *
+ * The suites that only need *a* file to move can fall back to synthetic bytes
+ * when ffmpeg is missing. This one cannot: it drives the real ingest endpoint,
+ * and the pipeline behind it refuses anything ffprobe cannot read. A fixture
+ * of random bytes would fail exactly where a real film would pass, so a
+ * missing ffmpeg is a broken environment, not a reason to skip or to fake it.
+ */
+function findFfmpeg() {
+  for (const bin of FFMPEG_CANDIDATES) {
+    try {
+      execFileSync(bin, ['-version'], { stdio: 'ignore' });
+      return bin;
+    } catch {
+      /* not this one */
+    }
+  }
+  throw new Error(
+    'ffmpeg is required by this suite and was not found.\n' +
+      `Looked for: ${FFMPEG_CANDIDATES.join(', ')}\n` +
+      'Install it (Debian/Ubuntu: sudo apt-get install ffmpeg) and run this again.',
+  );
+}
+
+let ffmpegBin = null;
+let videoCounter = 0;
+
+/**
  * A real, playable video of roughly the wanted size.
  *
  * Random bytes used to stand in for a film here; the pipeline now refuses a
@@ -158,15 +200,15 @@ async function apiCall(base, token, method, route, { json, headers = {}, body } 
  * "movie" fail exactly where a real one would pass. Each call varies the
  * pattern so two fixtures never share a checksum.
  */
-let videoCounter = 0;
 async function makeVideo(target, approxBytes) {
+  ffmpegBin ??= findFfmpeg();
   videoCounter += 1;
   // Uncompressed frames, so the size is arithmetic rather than whatever a
   // codec makes of a test pattern: 320x240 yuv420p is 115,200 bytes a frame.
   const frames = Math.max(1, Math.ceil(approxBytes / 115_200));
   const pattern = `testsrc=size=320x240:rate=25`;
   await execFileAsync(
-    '/usr/lib/jellyfin-ffmpeg/ffmpeg',
+    ffmpegBin,
     ['-v', 'error', '-y', '-f', 'lavfi', '-i', pattern, '-frames:v', String(frames), '-c:v', 'rawvideo', '-pix_fmt', 'yuv420p', target],
     { timeout: 120_000 },
   );

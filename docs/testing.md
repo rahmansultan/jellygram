@@ -5,7 +5,7 @@ server, no TMDB key, no network. If you can run `npm run migrate`, you can run
 the tests.
 
 ```bash
-npm run build:tests && npm test    # 426 unit and integration tests
+npm run build:tests && npm test    # 431 unit and integration tests
 npm run test:frontend              # 73 dashboard and Mini App UI tests
 npm run test:all                   # everything, including the e2e suites
 ```
@@ -119,21 +119,33 @@ properly.
 
 | Command | What it needs | What it covers |
 | --- | --- | --- |
-| `npm test` | PostgreSQL | 426 unit and integration tests |
+| `npm test` | PostgreSQL | 431 unit and integration tests |
 | `npm run test:frontend` | nothing | The dashboard and Mini App bundles in jsdom |
 | `npm run test:http` | PostgreSQL | Real HTTP: CSP, headers, static assets, auth gates |
 | `npm run test:e2e` | PostgreSQL, ffmpeg optional | The whole pipeline against a real generated video |
 | `npm run test:multipart` | PostgreSQL | Split, stream, resume, assemble, verify |
 | `npm run test:mtproto` | PostgreSQL | The MTProto route with a fake client |
-| `npm run test:recovery` | PostgreSQL, media group | Failure diagnostics and retry against a live worker |
-| `npm run test:uploader` | PostgreSQL | The real uploader against two servers of the suite's own |
+| `npm run test:recovery` | PostgreSQL, ffmpeg, media group | Failure diagnostics and retry against a live worker |
+| `npm run test:uploader` | PostgreSQL, ffmpeg | The real uploader against two servers of the suite's own |
 | `npm run test:setup` | PostgreSQL, `script(1)` | The interactive setup prompts, in a real pty |
 | `npm run test:dashboard` | a running API | Every dashboard page, as a signed-in administrator |
 | `npm run test:responsive` | a running API, Chrome | Seven viewports in headless Chrome |
 
 `test:e2e` builds a tiny real video with ffmpeg so `ffprobe` sees genuine
 content; without ffmpeg it writes a placeholder and the container check is
-skipped rather than failed.
+skipped rather than failed. `test:multipart` and `test:mtproto` degrade the
+same way.
+
+`test:uploader` and `test:recovery` **require** ffmpeg and say so if it is
+missing. They drive the real ingest endpoint, and the pipeline behind it
+refuses a file `ffprobe` cannot read — so a fixture of random bytes would fail
+exactly where a real film would pass, and skipping the check would mean
+reporting a pass for the one thing those suites exist to prove. On Debian or
+Ubuntu, `sudo apt-get install ffmpeg`; CI installs it for the same reason.
+
+Each of them looks for `/usr/lib/jellyfin-ffmpeg/ffmpeg` first, then
+`/usr/bin/ffmpeg`, then `ffmpeg` on PATH — the order the application itself
+uses for `ffprobe`.
 
 `test:recovery` asserts on-disk group ownership, so it skips those assertions
 when `MEDIA_GROUP` does not resolve on the machine — reporting a skip it can

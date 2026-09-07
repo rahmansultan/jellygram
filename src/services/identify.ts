@@ -40,6 +40,20 @@ export const MIN_CONFIDENCE = 0.35;
 /** ffprobe ships with Jellyfin; fall back to a system ffprobe if present. */
 const FFPROBE_CANDIDATES = ['/usr/lib/jellyfin-ffmpeg/ffprobe', '/usr/bin/ffprobe', 'ffprobe'];
 
+/**
+ * The binaries to try, in order: an operator's explicit `FFPROBE_PATH` first,
+ * then the search above.
+ *
+ * Configured first rather than instead, so a path that has gone stale — a
+ * Homebrew upgrade, a rebuilt container — falls back to the search and keeps
+ * validating containers, instead of silently turning the check off.
+ *
+ * Exported for the tests, which assert the ordering rather than run ffprobe.
+ */
+export function ffprobeCandidates(configured = config.storage.ffprobePath): string[] {
+  return configured ? [configured, ...FFPROBE_CANDIDATES] : FFPROBE_CANDIDATES;
+}
+
 export interface ProbeResult {
   durationSec: number | null;
   width: number | null;
@@ -57,7 +71,7 @@ export interface ProbeResult {
  * or backticks is inert.
  */
 export async function probeFile(filePath: string): Promise<ProbeResult | null> {
-  for (const bin of FFPROBE_CANDIDATES) {
+  for (const bin of ffprobeCandidates()) {
     try {
       const { stdout } = await execFileAsync(
         bin,

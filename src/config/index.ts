@@ -303,6 +303,22 @@ const schema = z.object({
   MEDIA_GROUP: str('jellyfin'),
   MEDIA_DIR_MODE: mode('0750'),
   MEDIA_FILE_MODE: mode('0640'),
+  /**
+   * Where ffprobe lives, when it is somewhere this application would not think
+   * to look.
+   *
+   * Empty — the default — means try Jellyfin's bundled build, then
+   * `/usr/bin/ffprobe`, then whatever `ffprobe` resolves to on PATH, which
+   * covers a Debian-packaged Jellyfin, an ordinary distribution package, and a
+   * container image. Set it for the cases that search cannot reach: Homebrew
+   * on macOS, a Nix store path, a pinned build, or a Jellyfin installed
+   * somewhere other than /usr/lib.
+   *
+   * A value given here is tried first and the search still follows if it does
+   * not work, so a stale path degrades to the old behaviour rather than
+   * disabling container validation outright.
+   */
+  FFPROBE_PATH: str(''),
 
   // --- TMDB -----------------------------------------------------------------
   TMDB_API_KEY: str(''),
@@ -502,6 +518,7 @@ export const config = {
     mediaGroup: e.MEDIA_GROUP,
     dirMode: parseInt(e.MEDIA_DIR_MODE, 8),
     fileMode: parseInt(e.MEDIA_FILE_MODE, 8),
+    ffprobePath: e.FFPROBE_PATH.trim(),
   },
 
   upload: {

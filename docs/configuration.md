@@ -100,6 +100,7 @@ are probed.
 | `MEDIA_GROUP` | `jellyfin` | Empty disables group management entirely |
 | `MEDIA_DIR_MODE` | `0750` | |
 | `MEDIA_FILE_MODE` | `0640` | |
+| `FFPROBE_PATH` | *(empty)* | An explicit ffprobe, tried before the default search (Jellyfin's bundled build → `/usr/bin/ffprobe` → PATH). For Homebrew, Nix, or a Jellyfin outside `/usr/lib`. The search still follows it, so a stale path degrades rather than disabling container validation |
 | `MAX_FILE_SIZE_BYTES` | `2097152000` | 2000 MB — the local Bot API server's own ceiling |
 | `MIN_FREE_DISK_BYTES` | `10737418240` | A download that would leave less is refused |
 | `DISK_SAFETY_MARGIN_BYTES` | `2147483648` | Headroom required on top of the file's size |

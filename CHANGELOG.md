@@ -83,6 +83,10 @@ is the work of making it deployable by somebody else.
 - `DATABASE_URL` is validated as a PostgreSQL connection string. A typo used to
   be accepted and surface much later as `getaddrinfo EAI_AGAIN base`; it is now
   a configuration error like any other, reported by name with exit 78.
+- `FFPROBE_PATH`, for an ffprobe the default search cannot reach — Homebrew, a
+  Nix store path, or a Jellyfin installed outside `/usr/lib`. Tried before the
+  existing search rather than instead of it, so a stale value degrades to the
+  old behaviour instead of disabling container validation.
 - A guard on the commands that run compiled code. Running `npm run migrate`
   before `npm run build` said `Cannot find module '…/dist/scripts/migrate.js'`;
   it now says to run `npm run build`, and `npm run init` lists that step.
@@ -99,7 +103,7 @@ is the work of making it deployable by somebody else.
   `JELLYGRAM_TEST_DATABASE_NAME`.
 - Four reaper tests that skipped themselves whenever local Bot API mode was off
   — which on a fresh clone is always — now set the mode themselves and run. The
-  suite reports 426 passed, 0 skipped.
+  suite reports 431 passed, 0 skipped.
 - A relative `TELEGRAM_LOCAL_HOST_ROOT` now resolves against the project
   directory rather than the working directory, so `./botapi-data` means the same
   thing to `docker compose` and to a service systemd started from elsewhere.

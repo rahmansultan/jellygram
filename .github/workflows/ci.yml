@@ -54,6 +54,21 @@ jobs:
           node-version: 22
           cache: npm
 
+      # The end-to-end suites build real, playable fixtures rather than random
+      # bytes, because the pipeline deliberately refuses a file ffprobe cannot
+      # read. The runner image does not ship ffmpeg, so install it here rather
+      # than let each suite decide what to do without one: with it present,
+      # test:uploader and test:recovery can run at all, and the pipeline,
+      # multi-part and MTProto suites exercise a genuine video instead of
+      # falling back to synthetic bytes. It also puts a real ffprobe on PATH,
+      # so the application's own container check is covered too.
+      - name: Install ffmpeg
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends ffmpeg
+          ffmpeg -version | head -1
+          ffprobe -version | head -1
+
       - run: npm ci
 
       - name: Typecheck
