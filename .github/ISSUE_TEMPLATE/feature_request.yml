@@ -1,5 +1,5 @@
 name: Feature request
-description: Suggest something this project should do.
+description: Suggest something JellyGram should do.
 labels: [enhancement]
 body:
   - type: markdown

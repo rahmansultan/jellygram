@@ -1,51 +1,97 @@
 <h1 align="center">JellyGram</h1>
 
 <p align="center">
-  <strong>A self-hosted Telegram bot and Mini App for managing and uploading media to Jellyfin.</strong>
+  <strong>An open-source, self-hosted Telegram bot and Mini App for uploading and managing<br>
+  personal media on a Jellyfin server — with a private library for every person you share it with.</strong>
 </p>
 
 <p align="center">
-  Send a film to your bot. It lands in your own private Jellyfin library —<br>
-  correctly named, correctly filed, and invisible to everyone else on the server.
+  <a href="#quick-start"><b>Quick start</b></a> ·
+  <a href="#what-is-jellygram">What it is</a> ·
+  <a href="#features">Features</a> ·
+  <a href="#screenshots">Screenshots</a> ·
+  <a href="docs/">Docs</a> ·
+  <a href="#faq">FAQ</a>
 </p>
 
 <p align="center">
-  <a href="https://github.com/NahomHabtamuNSC/jellygram/actions/workflows/ci.yml"><img alt="CI" src="https://github.com/NahomHabtamuNSC/jellygram/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/NahomHabtamuNSC/jellygram/actions/workflows/ci.yml"><img alt="CI status" src="https://github.com/NahomHabtamuNSC/jellygram/actions/workflows/ci.yml/badge.svg"></a>
+  <a href="https://github.com/NahomHabtamuNSC/jellygram/tags"><img alt="Latest tag" src="https://img.shields.io/github/v/tag/NahomHabtamuNSC/jellygram?label=version"></a>
   <a href="LICENSE"><img alt="License: MIT" src="https://img.shields.io/badge/license-MIT-blue.svg"></a>
-  <img alt="Node 22+" src="https://img.shields.io/badge/node-%E2%89%A522-brightgreen.svg">
+  <img alt="Node.js 22+" src="https://img.shields.io/badge/node.js-%E2%89%A522-brightgreen.svg">
   <img alt="PostgreSQL 14+" src="https://img.shields.io/badge/postgresql-%E2%89%A514-336791.svg">
-  <img alt="TypeScript" src="https://img.shields.io/badge/typescript-strict-3178c6.svg">
-  <img alt="Self-hosted" src="https://img.shields.io/badge/self--hosted-no%20cloud-black.svg">
+  <img alt="TypeScript, strict mode" src="https://img.shields.io/badge/typescript-strict-3178c6.svg">
 </p>
 
 <p align="center">
-  <img src="docs/images/dashboard-uploads.png" alt="The Uploads page: files arriving from Telegram for three different users, with live progress, per-file status, and confirmation that each one reached Jellyfin." width="900">
+  <img src="docs/images/dashboard-uploads.png" alt="JellyGram admin dashboard, Uploads page: films arriving from Telegram for three different users, each row showing size, live transfer progress, status, and confirmation that the file reached Jellyfin." width="900">
 </p>
 
-**What JellyGram is.** Three small services and a browser UI that sit between
-Telegram and a Jellyfin server you already run. People send you video files in a
-Telegram chat, or upload them through a Mini App on their phone; JellyGram
-identifies each one, files it into the layout Jellyfin expects, and puts it in a
-library only that person can see. Everything runs on your machine — no cloud
-service in the middle, no account anywhere but your own server, and no third
-party ever holds your media.
+## What is JellyGram?
 
-**Who it is for.** Anyone running Jellyfin for more than one person — a
-household, a few friends — who is tired of being the only one who can add
-anything to it. Give somebody a Telegram account and a Jellyfin account, and
-they can add their own films without touching your server, without an SSH key,
-and without seeing anybody else's library.
+JellyGram is a **self-hosted Telegram bot for Jellyfin**. You run it on your own
+machine, next to a [Jellyfin](https://jellyfin.org) media server you already
+have. People send you a video file in a Telegram chat — or upload one from the
+Telegram Mini App on their phone — and JellyGram identifies it, renames it into
+the layout Jellyfin expects, files it on disk, and adds it to a Jellyfin library
+that only that person can see.
 
-**Why it exists.** Jellyfin grants access per *library*, not per folder, so
-"just give everyone their own directory" gives you no privacy at all. Getting
-this right means creating a library per user and constraining each account to
-it — then checking, continuously, that it is still true. That check is the
-thing this project is actually built around; the Telegram bot is how the media
-gets in. See [Why per-user privacy is the hard part](#why-per-user-privacy-is-the-hard-part).
+It is open source (MIT), runs entirely on your own hardware, and no third party
+ever holds your media or your credentials.
+
+## Why JellyGram exists
+
+Jellyfin is very good at *serving* a personal media library. Getting things
+**into** one, when more than one person is involved, is where it gets tedious:
+somebody sends you a file, you copy it to the server, rename it so the scanner
+recognises it, drop it in the right folder, fix the permissions, and trigger a
+scan. Do that for a household and you become the bottleneck for everyone else.
+
+The obvious shortcut — give everyone a folder — does not work, because **Jellyfin
+grants access per _library_, not per folder**. An account with "access to all
+libraries" sees every file on the server regardless of which directory it sits
+in. Real per-person privacy means a library per user, each account constrained to
+its own, and something that keeps checking that this is still true.
+
+JellyGram does both halves: Telegram is how the media gets in, and per-user
+Jellyfin isolation is what it guarantees once it is there. The dashboard
+re-derives that isolation from Jellyfin's own API — not from its own database —
+so a change somebody made in the Jellyfin UI shows up as a finding instead of a
+silent leak.
+
+## Who is it for?
+
+- **Homelab and self-hosting enthusiasts** already running Jellyfin who want a
+  hands-off way to accept media.
+- **Households and small friend groups** sharing one media server, where only
+  one person currently has server access.
+- **Anyone tired of being the upload bottleneck** — give someone a Telegram
+  account and a Jellyfin account and they can add their own films without an SSH
+  key, a file manager, or a look at anybody else's library.
+- **People who want a phone-friendly front end** to a self-hosted library, via
+  the Telegram Mini App, without exposing the server itself.
+
+JellyGram is a media-management tool for libraries you are entitled to hold —
+your own recordings, your own rips, and anything else you have the right to
+store. It does not search for, index, or download content from anywhere; every
+file arrives because someone you registered deliberately sent it.
+
+## How it compares
+
+JellyGram is not a replacement for Jellyfin, and not an *arr — it fills the gap
+between them.
+
+| | What it does | JellyGram's place |
+| --- | --- | --- |
+| **Jellyfin** | Stores, transcodes and streams your library | Stays exactly as it is. JellyGram writes files and library policy into it through its public API |
+| **Sonarr / Radarr** | Automate *acquiring* content from indexers | Different job. JellyGram never searches or fetches anything; a registered person sends a file they already have |
+| **A shared folder or SMB mount** | Puts files on the server | Gives no per-user privacy in Jellyfin, no identification, no renaming, and needs server access |
+| **JellyGram** | Telegram as the interaction layer; identification, filing and per-user Jellyfin isolation as the guarantee | — |
 
 ## Contents
 
-- [What it does](#what-it-does)
+- [Features](#features)
+- [Screenshots](#screenshots)
 - [Architecture](#architecture)
 - [Why per-user privacy is the hard part](#why-per-user-privacy-is-the-hard-part)
 - [Requirements](#requirements)
@@ -63,45 +109,50 @@ gets in. See [Why per-user privacy is the hard part](#why-per-user-privacy-is-th
 - [Security](#security)
 - [Documentation](#documentation)
 - [Contributing](#contributing)
+- [FAQ](#faq)
 - [Licence](#licence)
 
 ---
 
-## What it does
+## Features
 
-- **A Telegram bot** that accepts MP4, MKV, AVI and MOV from registered users
-  only. Everything else — including subtitle files — is refused with a reason.
-- **Identification.** The filename is parsed, then confirmed against TMDB when a
-  key is configured. `Interstellar.2014.1080p.BluRay.mkv` becomes
-  *Interstellar (2014)*; `Breaking.Bad.S02E03.1080p.mkv` becomes
-  *Breaking Bad*, season 2, episode 3. What the parser cannot place confidently
-  is quarantined for review rather than guessed at.
-- **Organisation** into the layout Jellyfin expects:
+Everything below is implemented and covered by the test suite; nothing here is
+planned or aspirational.
 
-  ```
-  movies/alice/Interstellar (2014)/Interstellar (2014).mkv
-  tv/alice/Breaking Bad/Season 02/Breaking Bad - S02E03.mkv
-  ```
+| | |
+| --- | --- |
+| **Telegram bot** | Accepts MP4, MKV, AVI and MOV from registered users only. Everything else — including subtitle files — is refused with a reason |
+| **Telegram Mini App** | The same library, uploads and live progress inside Telegram, on a phone. Authenticated by verified `initData`, not by trust |
+| **Admin dashboard** | Users, uploads, media, storage, privacy audit, health, settings and logs. Plain HTML, CSS and JavaScript — no build step, no bundler, no CDN |
+| **Automatic identification** | The filename is parsed, then confirmed against TMDB when a key is configured. `Interstellar.2014.1080p.BluRay.mkv` → *Interstellar (2014)* |
+| **Jellyfin-correct filing** | `movies/alice/Interstellar (2014)/…` and `tv/alice/Breaking Bad/Season 02/…`, with the ownership and modes Jellyfin needs to read them |
+| **Per-user private libraries** | A directory pair *and* a Jellyfin library pair per person, with `EnableAllFolders = false` — re-verified continuously from Jellyfin's own API |
+| **Large files, four ways** | Telegram caps bots at 20 MB. A local Bot API server raises it to 2000 MB; the direct uploader and multi-part sends reach 5 GiB; MTProto ingests media already in Telegram |
+| **Resumable multi-part uploads** | Split, stream, resume an interrupted transfer, retry a failed part, verify checksums — no temporary copies |
+| **Durable background jobs** | The queue is PostgreSQL. A worker killed mid-download resumes from its last durable stage rather than starting over |
+| **Failure diagnostics and retry** | Per-stage error classification, exponential backoff, and `npm run upload:diagnose` to explain why one specific upload failed |
+| **Media validation** | `ffprobe` confirms a file really is a video before it is filed; what the parser cannot place confidently is quarantined for review rather than guessed at |
+| **Quotas and storage safety** | Per-user quotas, free-disk checks before a download starts, duplicate detection instead of overwriting, and nothing is ever deleted to make room |
+| **Health checks and alerts** | Database, disk, Telegram, Jellyfin, backups and failure rates, with optional Telegram alerts to an admin chat |
+| **Nightly backups** | Gzipped `pg_dump` on a timer, with retention and a staleness check surfaced on the dashboard |
+| **Security controls** | scrypt password hashing, CSRF on every non-`GET` admin route, per-client and per-account login rate limiting, path-traversal guards, an audit log, and no shell ever invoked with user input |
+| **Self-hosted deployment** | systemd unit templates, an installer, a reverse-proxy example, an optional country geofence, and Docker Compose for PostgreSQL and the local Bot API |
 
-- **Per-user privacy** — each user gets their own directories *and* their own
-  Jellyfin libraries, and their Jellyfin account is restricted to those
-  libraries. The dashboard re-verifies this from Jellyfin itself, continuously.
-- **An admin dashboard** — users, uploads, media, storage, a privacy audit,
-  health, settings and logs. Plain HTML, CSS and JavaScript: no build step, no
-  bundler, no CDN.
+## Screenshots
 
-  <img src="docs/images/dashboard-overview.png" alt="The dashboard overview: counts of active, queued, completed and failed uploads, free disk, a system health summary, storage usage and library totals." width="860">
+The admin dashboard, running against a demo database. All names and titles are
+fictional. The [privacy audit](#why-per-user-privacy-is-the-hard-part) and the
+[architecture diagram](#architecture) are shown further down.
 
-- **A Telegram Mini App** — the same library, uploads and live progress, inside
-  Telegram, on a phone.
-- **Four ways in for large files**, because Telegram will not hand a bot
-  anything over 20 MB by default. See [Large files](#large-files).
-- **Durable jobs.** The queue is PostgreSQL. A worker killed mid-download
-  resumes from its last durable stage; it does not re-download a finished file,
-  and it does not mistake its own earlier work for a duplicate.
-- **Safety by default.** Filenames are sanitised and cannot escape the media
-  root, free disk is checked before a download starts, duplicates are detected
-  rather than overwritten, and nothing is ever deleted to make room.
+<p align="center">
+  <img src="docs/images/dashboard-overview.png" alt="JellyGram dashboard overview: counts of active, queued, completed and failed uploads, free disk space, a system health summary showing every check passed, storage usage, and library totals for three users." width="880">
+  <br><em>Dashboard — what the system is doing right now, and anything that needs a decision.</em>
+</p>
+
+<p align="center">
+  <img src="docs/images/dashboard-media.png" alt="JellyGram Media page listing four filed titles with owner, type, size, and a Verified badge confirming Jellyfin can see each one." width="880">
+  <br><em>Media — everything filed, and whether Jellyfin can actually see it.</em>
+</p>
 
 ## Architecture
 
@@ -453,6 +504,62 @@ vulnerabilities privately — see [SECURITY.md](SECURITY.md).
 Issues and pull requests are welcome. [CONTRIBUTING.md](CONTRIBUTING.md) has the
 setup, the conventions this codebase actually follows, and what a good change
 looks like here.
+
+## FAQ
+
+**What is JellyGram?**
+A self-hosted Telegram bot, Telegram Mini App and admin dashboard that uploads
+and organises personal media into a [Jellyfin](https://jellyfin.org) server you
+run yourself, giving each person their own private Jellyfin library.
+
+**How does it work with Jellyfin?**
+JellyGram never replaces Jellyfin and never touches its database. It writes
+files into the directory layout Jellyfin's scanner expects, then uses Jellyfin's
+public HTTP API to create one pair of libraries per user, set that account's
+access policy to those libraries only, and trigger a scan. It re-reads that
+state from Jellyfin to confirm it, rather than assuming it held.
+
+**Can I upload media to Jellyfin through Telegram?**
+Yes — that is the main path. Send a video file to the bot in a private chat, or
+upload it from the Mini App. Telegram's public Bot API caps bots at 20 MB; for
+anything larger there are three further routes, up to 5 GiB. See
+[Large files](#large-files).
+
+**Is JellyGram self-hosted?**
+Entirely. Three Node.js processes and a PostgreSQL database on your own machine.
+There is no JellyGram cloud service, no hosted account, and no third party in the
+path of your media.
+
+**Is JellyGram open source?**
+Yes — [MIT licensed](LICENSE), with the full source, tests and CI in this
+repository.
+
+**What does JellyGram require?**
+Node.js 22+, PostgreSQL 14+, and a Jellyfin server (10.8+) whose media directory
+this machine can write to. A Telegram bot token from
+[@BotFather](https://t.me/BotFather). Optional: a TMDB key for richer
+identification, Docker for the bundled PostgreSQL and local Bot API server,
+`ffprobe` for container validation. Full list under
+[Requirements](#requirements).
+
+**How do I install it?**
+`git clone`, `npm ci`, `npm run init`, `npm run build`, `npm run migrate`,
+`npm run setup`. Step by step in [Quick start](#quick-start), and
+[deploy/README.md](deploy/README.md) for systemd.
+
+**Does it download or find content for me?**
+No. JellyGram has no indexer, no tracker, and no search of any kind. Every file
+arrives because a person you registered deliberately sent it. It is for media
+you already have and are entitled to keep.
+
+**Does it work if Jellyfin is on a different machine?**
+Yes, as long as the worker can write to the media tree Jellyfin reads and can
+reach its API. See [docs/networking.md](docs/networking.md).
+
+**What happens if the worker dies mid-upload?**
+The queue is PostgreSQL, so the job survives. On restart the worker resumes from
+its last durable stage — it does not re-download a finished file, and does not
+mistake its own earlier work for a duplicate.
 
 ## Licence
 

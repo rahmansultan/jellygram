@@ -1,5 +1,9 @@
 # Security Policy
 
+This policy covers JellyGram — the self-hosted Telegram bot, Mini App and
+admin dashboard in this repository. It does not cover Jellyfin or Telegram
+themselves; report issues in those to their own projects.
+
 ## Reporting a vulnerability
 
 **Please do not open a public issue for a security problem.**
