@@ -65,7 +65,29 @@ async function runSetup(answers) {
     cwd: PROJECT,
     timeout: 180_000,
     maxBuffer: 8 * 1024 * 1024,
-    env: { ...process.env, JELLYGRAM_ANSWERS: JSON.stringify(answers) },
+    env: {
+      ...process.env,
+      JELLYGRAM_ANSWERS: JSON.stringify(answers),
+      /**
+       * A Jellyfin that is definitely not there, so the questions asked are
+       * the same on every machine.
+       *
+       * Section 2 calls the real server before it decides what to ask: when
+       * one answers it offers "Create an API key now?", and when none does it
+       * says so and moves on. The answers below are a fixed list fed as
+       * keystrokes, so that extra question shifted every later answer by one —
+       * the TMDB key was typed at the API ID prompt, and a secret went to a
+       * prompt that does not mask. It passed on a developer's machine, where
+       * Jellyfin is usually running on 8096, and failed on CI, where nothing
+       * is. Pinning the address makes the branch deterministic instead of
+       * dependent on what happens to be listening.
+       *
+       * Port 9 is discard, and 127.0.0.1 never leaves the machine — the same
+       * dead address `tests/helpers/test-credentials.ts` uses, for the same
+       * reason.
+       */
+      JELLYFIN_URL: 'http://127.0.0.1:9',
+    },
   }).catch((err) => ({ stdout: (err.stdout ?? '') + (err.stderr ?? '') }));
 
   // A pty terminates lines with CRLF; normalise so assertions stay readable.
@@ -105,10 +127,13 @@ async function main() {
 
     // -------------------------------------------------------------------
     // Pass 1: supply every value.
-    // Answers in order: bot token, create-jellyfin-key? (no), tmdb, api id, api hash
+    // Answers in order: bot token, tmdb, api id, api hash. There is no
+    // Jellyfin question: runSetup points the script at a dead address, so
+    // section 2 reports the server as unreachable rather than offering to
+    // create a key.
     // -------------------------------------------------------------------
     process.stdout.write('1. Supplying every value\n');
-    const out1 = await runSetup([SECRETS.botToken, 'n', SECRETS.tmdb, API_ID, SECRETS.apiHash]);
+    const out1 = await runSetup([SECRETS.botToken, SECRETS.tmdb, API_ID, SECRETS.apiHash]);
 
     check('the script prompts for the API ID', () =>
       assert.match(out1, /4\. Telegram API ID/, 'section 4 missing'),
@@ -120,6 +145,14 @@ async function main() {
       for (const n of ['1. Telegram bot token', '2. Jellyfin API key', '3. TMDB API key']) {
         assert.ok(out1.includes(n), `missing "${n}"`);
       }
+    });
+    check('an unreachable Jellyfin is reported, not fatal', () => {
+      // The branch this suite actually runs, asserted rather than assumed:
+      // setup says it cannot reach the server, does not offer to create a key,
+      // and carries on to the remaining sections.
+      assert.match(out1, /Cannot reach Jellyfin/, 'expected the unreachable-Jellyfin notice');
+      assert.ok(!out1.includes('Create an API key now?'), 'no key offer without a server');
+      assert.match(out1, /3\. TMDB API key/, 'setup must continue past section 2');
     });
 
     // -------------------------------------------------------------------
@@ -166,7 +199,7 @@ async function main() {
     // Pass 2: press Enter at everything; nothing may change.
     // -------------------------------------------------------------------
     process.stdout.write('\n4. Enter preserves existing values\n');
-    const out2 = await runSetup(['', 'n', '', '', '']);
+    const out2 = await runSetup(['', '', '', '']);
 
     const after2 = readEnv();
     check('the API ID is unchanged', () => assert.equal(after2.get('TELEGRAM_API_ID'), API_ID));
@@ -193,7 +226,7 @@ async function main() {
     // Pass 3: rejected input must not be written.
     // -------------------------------------------------------------------
     process.stdout.write('\n5. Invalid input is rejected, not stored\n');
-    const out3 = await runSetup(['not-a-token', 'n', '', 'twelve', 'nothex']);
+    const out3 = await runSetup(['not-a-token', '', 'twelve', 'nothex']);
     const after3 = readEnv();
 
     check('a malformed bot token is refused', () => assert.match(out3, /does not look like a bot token/));
