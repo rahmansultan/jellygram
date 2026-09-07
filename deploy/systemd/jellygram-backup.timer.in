@@ -1,0 +1,14 @@
+[Unit]
+Description=Nightly database backup for JellyGram
+
+[Timer]
+# Nightly, with a spread so it never lands exactly on the hour alongside
+# whatever else the machine runs. Adjust to a quiet time in your own TZ.
+OnCalendar=*-*-* 03:30:00
+RandomizedDelaySec=20m
+# A machine that was asleep or off at 03:30 still gets its backup.
+Persistent=true
+Unit=jellygram-backup.service
+
+[Install]
+WantedBy=timers.target

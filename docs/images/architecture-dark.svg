@@ -1,0 +1,95 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 900 430" width="900" height="430" role="img" aria-label="Architecture: a Telegram bot and a Mini App write jobs to PostgreSQL; a worker claims them and runs download, identify, deduplicate, organise and Jellyfin scan, writing into per-user media directories that map to per-user Jellyfin libraries.">
+  <rect width="900" height="430" rx="10" fill="#0d1117"/>
+  <g font-family="ui-sans-serif,-apple-system,Segoe UI,Roboto,Helvetica,Arial,sans-serif">
+
+    <!-- Row 1: the four ways in -->
+    <text x="30" y="34" font-size="12" font-weight="600" fill="#9198a1" letter-spacing="1.2">WAYS IN</text>
+    <g>
+      <rect x="30" y="46" width="150" height="46" rx="7" fill="#161b22" stroke="#30363d"/>
+      <text x="105" y="68" font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Telegram bot</text>
+      <text x="105" y="83" font-size="10.5" fill="#9198a1" text-anchor="middle">send a file · 20 MB</text>
+
+      <rect x="196" y="46" width="150" height="46" rx="7" fill="#161b22" stroke="#30363d"/>
+      <text x="271" y="68" font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Local Bot API</text>
+      <text x="271" y="83" font-size="10.5" fill="#9198a1" text-anchor="middle">2000 MB</text>
+
+      <rect x="362" y="46" width="150" height="46" rx="7" fill="#161b22" stroke="#30363d"/>
+      <text x="437" y="68" font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Direct uploader</text>
+      <text x="437" y="83" font-size="10.5" fill="#9198a1" text-anchor="middle">5 GiB · resumable</text>
+
+      <rect x="528" y="46" width="150" height="46" rx="7" fill="#161b22" stroke="#30363d"/>
+      <text x="603" y="68" font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">MTProto</text>
+      <text x="603" y="83" font-size="10.5" fill="#9198a1" text-anchor="middle">forwarded media</text>
+
+      <rect x="694" y="46" width="176" height="46" rx="7" fill="#161b22" stroke="#30363d" stroke-dasharray="4 3"/>
+      <text x="782" y="68" font-size="13" font-weight="600" fill="#e6edf3" text-anchor="middle">Mini App</text>
+      <text x="782" y="83" font-size="10.5" fill="#9198a1" text-anchor="middle">library · progress</text>
+    </g>
+
+    <!-- arrows down to the queue -->
+    <g stroke="#30363d" stroke-width="1.5" fill="none">
+      <path d="M105 92 V116"/><path d="M271 92 V116"/><path d="M437 92 V116"/><path d="M603 92 V116"/><path d="M782 92 V116"/>
+    </g>
+
+    <!-- Row 2: the queue -->
+    <rect x="30" y="116" width="840" height="52" rx="7" fill="#161b22" stroke="#6cb6ff" stroke-width="1.6"/>
+    <text x="450" y="140" font-size="13.5" font-weight="700" fill="#6cb6ff" text-anchor="middle">PostgreSQL — durable job queue</text>
+    <text x="450" y="157" font-size="10.5" fill="#9198a1" text-anchor="middle">the only shared state; a killed worker resumes from its last durable stage</text>
+
+    <path d="M450 168 V196" stroke="#30363d" stroke-width="1.5" fill="none"/>
+
+    <!-- Row 3: the pipeline -->
+    <text x="30" y="190" font-size="12" font-weight="600" fill="#9198a1" letter-spacing="1.2">WORKER</text>
+    <rect x="30" y="196" width="840" height="66" rx="7" fill="#161b22" stroke="#30363d"/>
+    <g font-size="12" fill="#e6edf3" text-anchor="middle">
+      <text x="110" y="228" font-weight="600">download</text>
+      <text x="248" y="228" font-weight="600">identify</text>
+      <text x="386" y="228" font-weight="600">deduplicate</text>
+      <text x="524" y="228" font-weight="600">organise</text>
+      <text x="676" y="228" font-weight="600">set ownership</text>
+      <text x="810" y="228" font-weight="600">scan</text>
+    </g>
+    <g font-size="10" fill="#9198a1" text-anchor="middle">
+      <text x="110" y="245">resumable</text>
+      <text x="248" y="245">filename + TMDB</text>
+      <text x="386" y="245">never overwrite</text>
+      <text x="524" y="245">Jellyfin layout</text>
+      <text x="676" y="245">setgid, 0750</text>
+      <text x="810" y="245">Jellyfin API</text>
+    </g>
+    <g stroke="#21262d" stroke-width="1">
+      <path d="M179 208 V250"/><path d="M317 208 V250"/><path d="M455 208 V250"/><path d="M593 208 V250"/><path d="M755 208 V250"/>
+    </g>
+
+    <path d="M450 262 V292" stroke="#30363d" stroke-width="1.5" fill="none"/>
+
+    <!-- Row 4: on disk -->
+    <text x="30" y="286" font-size="12" font-weight="600" fill="#9198a1" letter-spacing="1.2">ON DISK</text>
+    <rect x="30" y="292" width="410" height="112" rx="7" fill="#161b22" stroke="#30363d"/>
+    <g font-family="ui-monospace,SFMono-Regular,Menlo,Consolas,monospace" font-size="11.5" fill="#e6edf3">
+      <text x="48" y="316">$MEDIA_ROOT/</text>
+      <text x="62" y="334">movies/alice/Interstellar (2014)/…</text>
+      <text x="62" y="352">movies/ben/Arrival (2016)/…</text>
+      <text x="62" y="370">tv/alice/Breaking Bad/Season 02/…</text>
+    </g>
+    <text x="48" y="391" font-size="10.5" fill="#9198a1">one directory per user · 0750, setgid, media group</text>
+
+    <!-- Row 4b: jellyfin -->
+    <rect x="460" y="292" width="410" height="112" rx="7" fill="#161b22" stroke="#d2a8ff" stroke-width="1.6"/>
+    <text x="665" y="316" font-size="13.5" font-weight="700" fill="#d2a8ff" text-anchor="middle">Jellyfin</text>
+    <g font-size="11.5" fill="#e6edf3" text-anchor="middle">
+      <text x="665" y="338">one pair of libraries per user</text>
+      <text x="665" y="357">EnableAllFolders = false</text>
+    </g>
+    <text x="665" y="378" font-size="10.5" fill="#9198a1" text-anchor="middle">alice sees alice's films. Nobody sees anybody else's.</text>
+    <text x="665" y="393" font-size="10.5" fill="#9198a1" text-anchor="middle">re-verified from Jellyfin's own API, continuously</text>
+
+    <!-- link disk -> jellyfin -->
+    <path d="M440 348 H460" stroke="#30363d" stroke-width="1.5" fill="none" marker-end="url(#a-d2a8ff)"/>
+    <defs>
+      <marker id="a-d2a8ff" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto">
+        <path d="M0 0 L10 5 L0 10 z" fill="#30363d"/>
+      </marker>
+    </defs>
+  </g>
+</svg>

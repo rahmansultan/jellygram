@@ -1,0 +1,49 @@
+[Unit]
+Description=JellyGram (api)
+Documentation=https://github.com/NahomHabtamuNSC/jellygram
+
+[Service]
+Type=simple
+WorkingDirectory=@APP_DIR@
+Environment=NODE_ENV=production
+Environment=TZ=@TZ@
+EnvironmentFile=@APP_DIR@/.env
+# A systemd *user* service cannot order itself after a system unit, and cannot
+# wait on network-online.target either. If PostgreSQL is a system service or a
+# container, all three services would otherwise start before it is ready at
+# every boot, die with a FATAL, and rely on Restart to eventually get lucky.
+# This gate waits instead — bounded, because a database that never arrives is a
+# real failure and should surface as one.
+ExecStartPre=@NODE@ @APP_DIR@/dist/scripts/wait-for-db.js --timeout-sec 60
+ExecStart=@NODE@ @APP_DIR@/dist/api/server.js
+
+# on-failure, not always: the bot deliberately exits 0 when it has no token,
+# and a configuration error exits 78 (EX_CONFIG) — neither is cured by
+# restarting every five seconds and logging the same line forever. A crash or a
+# lost database still restarts indefinitely.
+Restart=on-failure
+RestartPreventExitStatus=78
+RestartSec=5s
+StartLimitBurst=0
+TimeoutStartSec=120s
+TimeoutStopSec=90s
+KillSignal=SIGTERM
+
+# Runs unprivileged as the owning user and writes only under MEDIA_ROOT.
+# System-level hardening (ProtectKernelTunables and friends) is unavailable to
+# user units; run these as system units if you want it.
+#
+# PrivateTmp puts the process in a mount namespace where the media group's gid
+# may be unmapped, so chown to it fails with EINVAL. That is deliberate and
+# handled: ownership is carried by the setgid bit on the media directories,
+# which works regardless of the namespace.
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0027
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jellygram-api
+
+[Install]
+WantedBy=default.target

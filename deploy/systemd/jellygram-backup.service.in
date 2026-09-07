@@ -1,0 +1,24 @@
+[Unit]
+Description=JellyGram (database backup)
+Documentation=https://github.com/NahomHabtamuNSC/jellygram
+
+[Service]
+Type=oneshot
+WorkingDirectory=@APP_DIR@
+Environment=NODE_ENV=production
+Environment=TZ=@TZ@
+EnvironmentFile=@APP_DIR@/.env
+ExecStart=@NODE@ @APP_DIR@/dist/scripts/backup-db.js
+
+# A oneshot has no start timeout by default, and a timer will not fire again
+# while its own service is still running — so one pg_dump stuck behind a lock
+# would silently suspend every later backup. Bounded instead.
+TimeoutStartSec=15min
+
+# The dump is a complete copy of the database. Keep it owner-only.
+UMask=0077
+NoNewPrivileges=true
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jellygram-backup

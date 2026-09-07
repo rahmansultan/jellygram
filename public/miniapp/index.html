@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+    <meta name="color-scheme" content="light dark" />
+    <title>JellyGram</title>
+    <link rel="stylesheet" href="/app/css/app.css?v=3" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E"
+    />
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  </head>
+  <body>
+    <div id="root" class="root">
+      <div class="boot" id="boot">
+        <span class="spinner" aria-hidden="true"></span>
+        <p>Starting…</p>
+      </div>
+    </div>
+
+    <nav id="tabbar" class="tabbar" aria-label="Sections" hidden>
+      <button class="tab" data-view="home" type="button">
+        <span class="tab-icon" aria-hidden="true">▦</span><span class="tab-label">Home</span>
+      </button>
+      <button class="tab" data-view="library" type="button">
+        <span class="tab-icon" aria-hidden="true">▷</span><span class="tab-label">Library</span>
+      </button>
+      <button class="tab" data-view="upload" type="button">
+        <span class="tab-icon" aria-hidden="true">↥</span><span class="tab-label">Upload</span>
+      </button>
+      <button class="tab" data-view="active" type="button">
+        <span class="tab-icon" aria-hidden="true">⇄</span><span class="tab-label">Transfers</span>
+        <span class="tab-badge" id="tab-badge-active" hidden></span>
+      </button>
+      <button class="tab" data-view="history" type="button">
+        <span class="tab-icon" aria-hidden="true">≡</span><span class="tab-label">Uploads</span>
+      </button>
+    </nav>
+
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+    <script src="/app/js/telegram.js?v=3"></script>
+    <script src="/app/js/jellyfin-route.js?v=3"></script>
+    <script src="/app/js/api.js?v=3"></script>
+    <script src="/app/js/app.js?v=3"></script>
+  </body>
+</html>

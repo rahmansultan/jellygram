@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Security vulnerability
+    url: https://github.com/NahomHabtamuNSC/jellygram/security/advisories/new
+    about: Report privately. Please do not open a public issue.
+  - name: Setup and configuration help
+    url: https://github.com/NahomHabtamuNSC/jellygram/blob/main/docs/troubleshooting.md
+    about: Symptoms, causes, and the diagnostics to run.

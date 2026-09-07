@@ -1,0 +1,64 @@
+# PostgreSQL for JellyGram.
+#
+# Optional. If you already run PostgreSQL 14 or newer, skip this file entirely
+# and point DATABASE_URL at your own server — see docs/database.md.
+#
+#   npm run db:up          start it
+#   npm run db:logs        follow its log
+#   npm run db:down        stop it (the volume, and your data, survive)
+#
+# Compose reads .env from this directory automatically, so the password is
+# never written into this file or passed on a command line.
+#
+# Set these three in .env before the first `up`, then use the same values in
+# DATABASE_URL. Changing them afterwards does NOT change an existing volume:
+# the credentials are baked in when the data directory is first initialised.
+#
+#   POSTGRES_USER=jellygram
+#   POSTGRES_PASSWORD=<something long>
+#   POSTGRES_DB=jellygram
+#   DATABASE_URL=postgresql://jellygram:<the same password>@127.0.0.1:55432/jellygram
+
+services:
+  postgres:
+    image: postgres:18-alpine
+    container_name: jellygram-postgres
+    restart: unless-stopped
+
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-jellygram}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:?POSTGRES_PASSWORD is not set in .env}
+      POSTGRES_DB: ${POSTGRES_DB:-jellygram}
+      # scram-sha-256 rather than the image's md5 default. Nothing here needs
+      # to interoperate with a client old enough to require md5.
+      POSTGRES_INITDB_ARGS: --auth-host=scram-sha-256
+
+    ports:
+      # Loopback only, and on 55432 rather than 5432 so it cannot collide with
+      # a PostgreSQL already installed on the host. Change the left-hand side
+      # if you need it elsewhere, and DATABASE_URL with it.
+      - "127.0.0.1:${POSTGRES_PORT:-55432}:5432"
+
+    volumes:
+      # A named volume, so `docker compose down` does not take the database
+      # with it. Removing it for real takes `docker volume rm`.
+      - jellygram-postgres-data:/var/lib/postgresql/data
+
+    healthcheck:
+      # `npm run migrate` and the services' own wait-for-db gate both handle a
+      # database that is not up yet, but a healthcheck makes the difference
+      # between "starting" and "broken" visible in `docker ps`.
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-jellygram} -d ${POSTGRES_DB:-jellygram}"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  jellygram-postgres-data:

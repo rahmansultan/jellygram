@@ -1,0 +1,45 @@
+# --- Dependencies and build output -------------------------------------------
+node_modules/
+dist/
+dist-tests/
+
+# --- Secrets -----------------------------------------------------------------
+# .env holds every secret this application has. Never commit it; .env.example
+# is the file that belongs in version control.
+.env
+.env.*
+!.env.example
+
+# MTProto session: anyone holding this can act as the Telegram account it
+# authenticated, until it is revoked in Telegram -> Settings -> Devices.
+.mtproto-session
+.mtproto-session*
+
+# The local Bot API server's data directory. Its per-bot subdirectory is NAMED
+# AFTER THE BOT TOKEN, so committing this directory would commit the token.
+botapi-data/
+
+# --- Data --------------------------------------------------------------------
+# Database dumps are a complete copy of every user record.
+backups/
+*.sql.gz
+
+# Per-service, per-day log files.
+logs/
+*.log
+
+# Media, and the scratch trees around it. A default MEDIA_ROOT inside the
+# project should never be committed by accident.
+media/
+.test-media/
+.dev-media/
+tmp/
+
+# --- Editors and operating systems -------------------------------------------
+.DS_Store
+Thumbs.db
+*.swp
+*~
+.idea/
+.vscode/
+!.vscode/extensions.json

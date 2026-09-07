@@ -1,0 +1,138 @@
+<!doctype html>
+<html lang="en" data-theme="auto">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <meta name="color-scheme" content="light dark" />
+    <title>JellyGram</title>
+    <link rel="stylesheet" href="/css/app.css" />
+    <link
+      rel="icon"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%8E%AC%3C/text%3E%3C/svg%3E"
+    />
+  </head>
+  <body>
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Login                                                              -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="login-view" class="login-view" hidden>
+      <form id="login-form" class="login-card" autocomplete="on">
+        <div class="login-brand">
+          <span class="login-icon" aria-hidden="true">🎬</span>
+          <h1>JellyGram</h1>
+          <p>Telegram → Jellyfin</p>
+        </div>
+        <label for="login-username">Username</label>
+        <input id="login-username" name="username" type="text" autocomplete="username" required />
+        <label for="login-password">Password</label>
+        <input
+          id="login-password"
+          name="password"
+          type="password"
+          autocomplete="current-password"
+          required
+        />
+        <button type="submit" class="btn btn-primary btn-block" id="login-submit">Sign in</button>
+        <p id="login-error" class="form-error" role="alert" hidden></p>
+        <p class="hint login-help">
+          Repeated failures are blocked for a few minutes. If you are locked out, wait and try again.
+        </p>
+      </form>
+    </div>
+
+    <!-- ------------------------------------------------------------------ -->
+    <!-- Application shell                                                  -->
+    <!-- ------------------------------------------------------------------ -->
+    <div id="app-view" class="app" hidden>
+      <a href="#main" class="sr-only">Skip to content</a>
+      <header class="topbar">
+        <button
+          id="nav-toggle"
+          class="icon-btn nav-toggle"
+          aria-label="Open navigation"
+          aria-expanded="false"
+          aria-controls="sidebar"
+        >
+          <span class="burger"></span>
+        </button>
+        <span class="brand"><span aria-hidden="true">🎬</span> JellyGram</span>
+        <div class="topbar-actions">
+          <button id="theme-toggle" class="icon-btn" aria-label="Colour theme" title="Theme">
+            <span id="theme-icon" aria-hidden="true">◐</span>
+          </button>
+          <span id="whoami" class="whoami"></span>
+          <button id="logout-btn" class="btn btn-ghost btn-sm">Sign out</button>
+        </div>
+      </header>
+
+      <div class="layout">
+        <nav id="sidebar" class="sidebar" aria-label="Sections">
+          <p class="nav-group-label" id="nav-overview">Overview</p>
+          <a href="#/dashboard" data-route="dashboard"
+            ><span class="nav-icon" aria-hidden="true">▦</span> Dashboard</a
+          >
+          <a href="#/health" data-route="health"
+            ><span class="nav-icon" aria-hidden="true">♥</span> Health</a
+          >
+
+          <p class="nav-group-label">Ingestion</p>
+          <a href="#/uploads" data-route="uploads"
+            ><span class="nav-icon" aria-hidden="true">↥</span> Uploads</a
+          >
+          <a href="#/multipart" data-route="multipart"
+            ><span class="nav-icon" aria-hidden="true">◫</span> Multipart</a
+          >
+          <a href="#/mtproto" data-route="mtproto"
+            ><span class="nav-icon" aria-hidden="true">⇄</span> Telegram fetch</a
+          >
+
+          <p class="nav-group-label">Library</p>
+          <a href="#/media" data-route="media"
+            ><span class="nav-icon" aria-hidden="true">▷</span> Media</a
+          >
+          <a href="#/storage" data-route="storage"
+            ><span class="nav-icon" aria-hidden="true">▤</span> Storage</a
+          >
+          <a href="#/users" data-route="users"
+            ><span class="nav-icon" aria-hidden="true">◍</span> Users</a
+          >
+
+          <p class="nav-group-label">Administration</p>
+          <a href="#/privacy" data-route="privacy"
+            ><span class="nav-icon" aria-hidden="true">⊙</span> Privacy</a
+          >
+          <a href="#/settings" data-route="settings"
+            ><span class="nav-icon" aria-hidden="true">⚙</span> Settings</a
+          >
+          <a href="#/logs" data-route="logs"
+            ><span class="nav-icon" aria-hidden="true">≡</span> Activity &amp; logs</a
+          >
+        </nav>
+        <div id="sidebar-scrim" class="sidebar-scrim" hidden></div>
+
+        <main id="main" class="main" tabindex="-1">
+          <div class="loading">Loading…</div>
+        </main>
+      </div>
+    </div>
+
+    <!-- Modal host, reused by every dialog -->
+    <dialog id="modal" class="modal" aria-labelledby="modal-title">
+      <form method="dialog" id="modal-form">
+        <h2 id="modal-title"></h2>
+        <div id="modal-body"></div>
+        <p id="modal-error" class="form-error" role="alert" hidden></p>
+        <menu class="modal-actions">
+          <button type="button" class="btn btn-ghost" data-close>Cancel</button>
+          <button type="submit" class="btn btn-primary" id="modal-submit">Save</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <div id="toasts" class="toasts" role="status" aria-live="polite"></div>
+
+    <script src="/js/api.js"></script>
+    <script src="/js/ui.js"></script>
+    <script src="/js/app.js"></script>
+  </body>
+</html>

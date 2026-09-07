@@ -1,0 +1,15 @@
+[Unit]
+Description=Weekly refresh of Jellyfin's country fence
+
+[Timer]
+# Once a week is plenty: a registry assigns a country new blocks a few times a
+# year. Early Sunday, with a spread so it never lands on the hour alongside
+# whatever else the machine runs.
+OnCalendar=Sun *-*-* 04:30:00
+RandomizedDelaySec=30m
+# A machine that was asleep or off on Sunday still gets its refresh.
+Persistent=true
+Unit=jellygram-geofence.service
+
+[Install]
+WantedBy=timers.target

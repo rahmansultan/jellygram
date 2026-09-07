@@ -1,0 +1,36 @@
+[Unit]
+Description=JellyGram (refresh Jellyfin's country fence)
+Documentation=file://@APP_DIR@/deploy/jellyfin-geofence.mjs
+
+# OPTIONAL. Install this pair only if you have deliberately exposed Jellyfin to
+# the internet and want to narrow which addresses may reach it. See
+# deploy/README.md, and read the caveats in the script itself first.
+
+[Service]
+Type=oneshot
+WorkingDirectory=@APP_DIR@
+Environment=NODE_ENV=production
+Environment=TZ=@TZ@
+# The same file the services read, read the same way, so the script sees
+# exactly the JELLYFIN_URL and JELLYFIN_API_KEY they do.
+EnvironmentFile=@APP_DIR@/.env
+
+# Set your own country, and give --must-include an address you have ACTUALLY
+# connected from. The script refuses to write any list that would not contain
+# it, so a registry that changed shape underneath you fails this unit loudly
+# instead of quietly locking you out. Nothing is written when the registry
+# cannot be reached at all: the previous fence simply stays in place.
+#
+#   Environment=GEOFENCE_COUNTRY=DE
+#   Environment=GEOFENCE_ALWAYS_ALLOW=10.0.0.0/8,192.168.0.0/16,100.64.0.0/10
+Environment=GEOFENCE_COUNTRY=
+ExecStart=@NODE@ @APP_DIR@/deploy/jellyfin-geofence.mjs --apply --must-include 203.0.113.1
+
+TimeoutStartSec=15min
+NoNewPrivileges=true
+PrivateTmp=true
+UMask=0077
+
+StandardOutput=journal
+StandardError=journal
+SyslogIdentifier=jellygram-geofence

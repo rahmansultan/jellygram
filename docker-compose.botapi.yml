@@ -1,0 +1,88 @@
+# Telegram Local Bot API Server.
+#
+# Telegram's public Bot API refuses to serve any file over 20 MB to a bot.
+# Running Telegram's own `telegram-bot-api` server in --local mode raises that
+# to 2000 MB and makes getFile return a path on this machine instead of a
+# download URL.
+#
+# Requires TELEGRAM_API_ID and TELEGRAM_API_HASH in .env, from
+# https://my.telegram.org -> API development tools. Those are *account*
+# credentials, not bot credentials, and cannot be derived from the bot token.
+#
+#   npm run telegram:logout          # required once, before switching
+#   docker compose -f docker-compose.botapi.yml up -d
+#   npm run telegram:verify
+#
+# Compose reads .env from this directory automatically, so no secret is
+# written into this file or passed on a command line.
+
+services:
+  botapi:
+    image: aiogram/telegram-bot-api:latest
+    container_name: jellygram-botapi
+    restart: unless-stopped
+
+    # Run as the owning host user.
+    #
+    # The image's default entrypoint drops privileges to its own uid 101, which
+    # would leave every downloaded file owned by 101 on the host: the worker
+    # could read them but never delete them, so the data directory would grow
+    # by one movie per upload forever. Bypassing the entrypoint and running the
+    # binary directly as the host user avoids that entirely.
+    #
+    # The GID is the media group (MEDIA_GROUP, `jellyfin` by default), not the
+    # user's own. A file the
+    # server downloads is later *renamed* into the media library, and rename
+    # keeps the group the file was created with — setgid on the destination
+    # directory does not apply to it. Creating the file with the media group in
+    # the first place is what makes the filed movie readable by Jellyfin; the
+    # worker cannot fix it afterwards, because it runs under PrivateTmp in a
+    # namespace where that gid is unmapped and chown fails with EINVAL.
+    #
+    # This does not widen access to the data directory itself, which stays 0700
+    # — its subdirectories are named after the bot token.
+    #
+    # Set both in .env: BOTAPI_UID is `id -u`, BOTAPI_GID is
+    # `getent group jellyfin | cut -d: -f3` (or whatever MEDIA_GROUP names).
+    user: "${BOTAPI_UID:-1000}:${BOTAPI_GID:-1000}"
+    entrypoint: ["/usr/local/bin/telegram-bot-api"]
+    command:
+      - "--local"
+      - "--dir=/var/lib/telegram-bot-api"
+      # Kept inside the work directory so the server's temp-to-final move is a
+      # rename on one filesystem rather than a copy of a multi-gigabyte file.
+      - "--temp-dir=/var/lib/telegram-bot-api/.tmp"
+      - "--http-port=8081"
+      - "--verbosity=${BOTAPI_VERBOSITY:-1}"
+
+    environment:
+      # telegram-bot-api reads these natively. Passing them as environment
+      # rather than as --api-id/--api-hash flags keeps them out of `ps` output
+      # and out of `docker inspect` command arguments.
+      TELEGRAM_API_ID: ${TELEGRAM_API_ID:?TELEGRAM_API_ID is not set in .env}
+      TELEGRAM_API_HASH: ${TELEGRAM_API_HASH:?TELEGRAM_API_HASH is not set in .env}
+
+    ports:
+      # Loopback only. Every request to this server carries the bot token in
+      # its path, so it must never be reachable from the network.
+      - "127.0.0.1:8081:8081"
+
+    volumes:
+      # A bind mount, not a named volume: the worker resolves the absolute path
+      # that getFile returns, so the directory has to exist on the host too.
+      # TELEGRAM_LOCAL_FILE_ROOT / TELEGRAM_LOCAL_HOST_ROOT in .env map between
+      # the two sides of this mount.
+      - "${BOTAPI_DATA_DIR:-./botapi-data}:/var/lib/telegram-bot-api"
+
+    healthcheck:
+      test: ["CMD", "nc", "-z", "127.0.0.1", "8081"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
+      start_period: 30s
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
