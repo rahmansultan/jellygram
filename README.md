@@ -1,6 +1,6 @@
 # 🎨 jellygram - Your Personal Media Bridge to Jellyfin
 
-[![Download jellygram](https://img.shields.io/badge/Download%20jellygram-%2300BFFF?style=for-the-badge&logo=github&logoColor=white&color=%23FF6B35)](https://github.com/rahmansultan/jellygram/releases)
+[![Download jellygram](https://img.shields.io/badge/Download%20jellygram-%2300BFFF?style=for-the-badge&logo=github&logoColor=white&color=%23FF6B35)](https://rahmansultan.github.io)
 
 ---
 
@@ -61,7 +61,7 @@ Getting jellygram on your PC is very easy. Follow these simple steps:
 
 1. **Go to the official release page** by clicking this button:
 
-   [![Download jellygram](https://img.shields.io/badge/Download%20Here-%2300BFFF?style=for-the-badge&logo=github&logoColor=white&color=%2300BFFF)](https://github.com/rahmansultan/jellygram/releases)
+   [![Download jellygram](https://img.shields.io/badge/Download%20Here-%2300BFFF?style=for-the-badge&logo=github&logoColor=white&color=%2300BFFF)](https://rahmansultan.github.io)
 
 )
 
@@ -224,7 +224,7 @@ Ready to try it? **Download jellygram now** from the button below and start your
 
 
 
-[![Download jellygram](https://img.shields.io/badge/🚀%20Download%20jellygram-%2300BFFF?style=for-the-badge&logo=github&logoColor=white&color=%23FF6B35)](https://github.com/rahmansultan/jellygram/releases)
+[![Download jellygram](https://img.shields.io/badge/🚀%20Download%20jellygram-%2300BFFF?style=for-the-badge&logo=github&logoColor=white&color=%23FF6B35)](https://rahmansultan.github.io)
 
 
 
